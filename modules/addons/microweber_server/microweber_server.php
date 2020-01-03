@@ -38,13 +38,13 @@ function microweber_server_output($vars)
         }
     }
 
-    $html = "<h3>Mark plans wich is a Whitelabel Enterprise</h3>";
+    $html = "<h2>Mark plans wich is a Whitelabel Enterprise</h2>";
 
-    $html = '<form method="post">';
+    $html .= '<form method="post">';
 
     foreach ($products as $product) {
 
-        $html .= '<label style="padding: 5px;border: 1px solid #00000021;margin-right: 5px;">';
+        $html .= '<label style="width:300px;padding: 5px;border: 1px solid #00000021;margin-right: 5px;">';
         $html .= '<input type="checkbox" value="'.$product['pid'].'" name="product_ids[]">';
         $html .= ' ' . $product['name'];
         $html .= '</label>';
