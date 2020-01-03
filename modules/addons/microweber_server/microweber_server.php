@@ -61,8 +61,10 @@ function microweber_server_output($vars)
 
 function microweber_server_activate()
 {
+    
 }
 
 function microweber_server_deactivate()
 {
+
 }
