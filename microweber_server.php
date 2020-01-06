@@ -98,7 +98,7 @@ function microweber_server_activate()
                     $table->string('domain');
                     $table->string('server_ip');
                     $table->string('license_key');
-                    $table->integer('clients_total');
+                    $table->integer('total_clients');
                     $table->timestamps();
                 }
             );
