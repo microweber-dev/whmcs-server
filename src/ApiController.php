@@ -9,8 +9,7 @@ class ApiController
     public function save_usage_report()
     {
 
-        
-        echo 111;
+        var_dump($_POST);
         die();
     }
 }
