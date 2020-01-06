@@ -6,9 +6,10 @@ if (!defined("WHMCS")) {
 define("CLIENTAREA", true);
 include "includes/clientfunctions.php";
 
+include_once __DIR__ . DIRECTORY_SEPARATOR . 'vendor/autoload.php';
+
 function microweber_server_config()
 {
-    $default_redirect_url = 'https://' . $_SERVER['HTTP_HOST'] . '/index.php?m=custom_oauth2';
     $config = array(
         'name' => 'Microweber Server',
         'description' => 'This module allows manage all whitelabels.',
@@ -30,38 +31,31 @@ function microweber_server_clientarea($vars)
 
 function microweber_server_output($vars)
 {
-    $products = array();
-    $results = localAPI('GetProducts', array());
-    if (isset($results['products']['product'])) {
-        foreach ($results['products']['product'] as $product) {
-            $products[] = $product;
-        }
+    $response = '';
+    $params = array();
+    if ($_GET) {
+        $params = array_merge($params, $_GET);
     }
-
-    $html = "<h2>Mark plans wich is a Whitelabel Enterprise</h2>";
-
-    $html .= '<form method="post">';
-
-    foreach ($products as $product) {
-
-        $html .= '<label style="width:300px;padding: 5px;border: 1px solid #00000021;margin-right: 5px;">';
-        $html .= '<input type="checkbox" value="'.$product['pid'].'" name="product_ids[]">';
-        $html .= ' ' . $product['name'];
-        $html .= '</label>';
-        $html .= '<br />';
-
+    if ($_POST) {
+        $params = array_merge($params, $_POST);
     }
-
-    $html .= "<button type='submit' class='btn btn-success'>Save</button>";
-    $html .= '<hr>';
-    $html .= '</form>';
-
-    echo $html;
+    if ($vars) {
+        $params = array_merge($params, $vars);
+    }
+    $controller = new \MicroweberServer\AdminController();
+    $method = 'index';
+    if (isset($params['function'])) {
+        $method = $params['function'];
+    }
+    if (method_exists($controller, $method)) {
+        $response = $controller->$method($params);
+    }
+    echo $response;
 }
 
 function microweber_server_activate()
 {
-    
+
 }
 
 function microweber_server_deactivate()
