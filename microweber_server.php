@@ -1,6 +1,7 @@
 <?php
 
 use WHMCS\Database\Capsule;
+use WHMCS\View\Menu\Item as MenuItem;
 
 if (!defined("WHMCS")) {
     die("This file cannot be accessed directly");
@@ -40,6 +41,22 @@ function microweber_server_clientarea($vars)
     }
 
     $response = $vars;
+
+    if (isset($_GET['action'])) {
+        $controller = new \MicroweberServer\ClientAreaController();
+        $method = false;
+        if (isset($_GET['action'])) {
+            $method = $_GET['action'];
+        }
+        if (method_exists($controller, $method)) {
+            $response = $controller->$method($params);
+        }
+        if ($response) {
+            return $response;
+        }
+        echo 'Action not found.';
+        exit;
+    }
 
     $controller = new \MicroweberServer\ApiController();
     $method = false;
@@ -117,7 +134,8 @@ function microweber_server_activate()
                     $table->increments('id');
                     $table->integer('client_id');
                     $table->text('api_key');
-                    $table->string('expiration_date');
+                    $table->string('api_key_type');
+                    $table->string('expiration_date')->nullable();
                     $table->timestamps();
                 }
             );
