@@ -49,7 +49,7 @@ class ApiController
             );
 
             $acceptOrder = localAPI('AcceptOrder', $acceptOrderData);
-            
+
             return array('success'=>true);
         }
 
