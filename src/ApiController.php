@@ -9,7 +9,6 @@ class ApiController
 
     public function create_account()
     {
-
         if (!isset($_GET['api_key']) && !isset($_GET['domain']) && !isset($_GET['username']) && !isset($_GET['password'])) {
             return false;
         }
@@ -49,13 +48,12 @@ class ApiController
                 'sendemail' => false,
             );
 
-            var_dump($addOrder);
-
             $acceptOrder = localAPI('AcceptOrder', $acceptOrderData);
-
-            print_r($acceptOrder);
-
+            
+            return array('success'=>true);
         }
+
+        return array('success'=>false);
     }
 
     public function validate_api_key()
