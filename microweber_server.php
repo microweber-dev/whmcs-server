@@ -68,6 +68,7 @@ function microweber_server_clientarea($vars)
     }
 
     if ($response) {
+        header('Content-Type: application/json');
         echo json_encode($response, JSON_PRETTY_PRINT);
         exit;
     }

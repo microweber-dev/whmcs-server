@@ -6,9 +6,27 @@ use WHMCS\Database\Capsule;
 
 class ApiController
 {
-    public function save_usage_report()
+
+    public function validate_api_key()
     {
 
+        if (isset($_GET['api_key'])) {
+            $api_key = $_GET['api_key'];
+
+            $get_api_key = Capsule::table('mod_microweber_cloudconnect_api_keys')
+                ->where('api_key_type', 'default')
+                ->where('api_key', $api_key)->first();
+
+            if ($get_api_key) {
+                return array('is_correct'=>true);
+            }
+        }
+
+        return array('is_correct'=>false);
+    }
+
+    public function save_usage_report()
+    {
         if (isset($_POST['total_clients']) && isset($_POST['whmcs_domain'])) {
 
             $totalClients = (int)$_POST['total_clients'];
