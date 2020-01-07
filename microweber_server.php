@@ -89,6 +89,7 @@ function microweber_server_output($vars)
 
 function microweber_server_activate()
 {
+    // Usage report table
     try {
         if (!Capsule::schema()->hasTable('mod_microweber_usage_reports')) {
             Capsule::schema()->create(
@@ -106,6 +107,24 @@ function microweber_server_activate()
     } catch (\Exception $e) {
         echo "Unable to create mod_microweber_usage_reports: {$e->getMessage()}";
     }
+
+    // Cloud Connect Api Keys
+    try {
+        if (!Capsule::schema()->hasTable('mod_microweber_cloudconnect_api_keys')) {
+            Capsule::schema()->create(
+                'mod_microweber_cloudconnect_api_keys',
+                function ($table) {
+                    $table->increments('id');
+                    $table->integer('client_id');
+                    $table->text('api_key');
+                    $table->string('expiration_date');
+                    $table->timestamps();
+                }
+            );
+        }
+    } catch (\Exception $e) {
+        echo "Unable to create mod_microweber_cloudconnect_api_keys: {$e->getMessage()}";
+    }
 }
 
 function microweber_server_deactivate()
@@ -114,5 +133,11 @@ function microweber_server_deactivate()
         Capsule::schema()->dropIfExists('mod_microweber_usage_reports');
     } catch (\Exception $e) {
         echo "Unable to drop table mod_microweber_usage_reports: {$e->getMessage()}";
+    }
+
+    try {
+        Capsule::schema()->dropIfExists('mod_microweber_cloudconnect_api_keys');
+    } catch (\Exception $e) {
+        echo "Unable to drop table mod_microweber_cloudconnect_api_keys: {$e->getMessage()}";
     }
 }
