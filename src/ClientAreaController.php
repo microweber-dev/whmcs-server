@@ -85,6 +85,6 @@ class ClientAreaController
 
     private function _generate_api_key()
     {
-        return uniqid() . uniqid();
+        return md5(time() . uniqid());
     }
 }
