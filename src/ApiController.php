@@ -10,18 +10,24 @@ class ApiController
     public function create_account()
     {
         if (!isset($_GET['api_key']) && !isset($_GET['domain']) && !isset($_GET['username']) && !isset($_GET['password'])) {
-            return false;
+            return array('success'=>false, 'message'=>'Wrong parameters.');
         }
 
         if (empty($_GET['api_key']) || empty($_GET['domain']) || empty($_GET['username']) || empty($_GET['password'])) {
-            return false;
+            return array('success'=>false, 'message'=>'Empty parameters.');
         }
 
+        $username = $_GET['username'];
+        $passowrd = $_GET['password'];
         $domain = $_GET['domain'];
         $api_key = $_GET['api_key'];
         $get_api_key = Capsule::table('mod_microweber_cloudconnect_api_keys')
             ->where('api_key_type', 'default')
             ->where('api_key', $api_key)->first();
+
+        if (!$get_api_key) {
+            return array('success'=>false, 'message'=>'Wrong api key.');
+        }
 
         $product_id = 1;
         $client_id = $get_api_key->client_id;
@@ -42,6 +48,7 @@ class ApiController
         $addOrder = localAPI('AddOrder', $orderData);
         if (isset($addOrder['orderid'])) {
 
+            // Accept order
             $acceptOrderData = array(
                 'orderid' => $addOrder['orderid'],
                 'autosetup' => true,
@@ -49,6 +56,14 @@ class ApiController
             );
 
             $acceptOrder = localAPI('AcceptOrder', $acceptOrderData);
+
+            // Update Client Product
+            $clientProductData = array(
+                'serviceid' => $addOrder['serviceids'],
+                'serviceusername' => $username,
+                'servicepassword' => $passowrd
+            );
+            $updateClientProduct = localAPI('UpdateClientProduct', $clientProductData);
 
             return array('success'=>true);
         }
