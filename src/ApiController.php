@@ -7,16 +7,46 @@ use WHMCS\Database\Capsule;
 class ApiController
 {
 
+    public function suspend_account()
+    {
+        $validate = $this->_validate_account_params();
+        if ($validate['success'] == false) {
+            return $validate;
+        }
+
+        $domain = $_GET['domain'];
+        $api_key = $_GET['api_key'];
+        $get_api_key = Capsule::table('mod_microweber_cloudconnect_api_keys')
+            ->where('api_key_type', 'default')
+            ->where('api_key', $api_key)->first();
+
+        if (!$get_api_key) {
+            return array('success'=>false, 'message'=>'Wrong api key.');
+        }
+
+        $service = $this->_get_product_service_by_domain($domain, $get_api_key->client_id);
+        if (!$service) {
+            return array('success'=>false, 'message'=>'Service not found');
+        }
+
+        $suspendData = array(
+            'serviceid' => $service->id,
+            'suspendreason' => 'Suspended by admin.',
+        );
+        $moduleSuspend = localAPI('ModuleSuspend', $suspendData);
+
+        return array('success'=>true, 'message'=>'Module is suspended.');
+    }
+
     public function create_account()
     {
-        if (!isset($_GET['api_key']) && !isset($_GET['domain']) && !isset($_GET['username']) && !isset($_GET['password'])) {
-            return array('success'=>false, 'message'=>'Wrong parameters.');
+        $validate = $this->_validate_account_params();
+        if ($validate['success'] == false) {
+            return $validate;
         }
 
-        if (empty($_GET['api_key']) || empty($_GET['domain']) || empty($_GET['username']) || empty($_GET['password'])) {
-            return array('success'=>false, 'message'=>'Empty parameters.');
-        }
-
+        echo 1;
+        die();
         $username = $_GET['username'];
         $passowrd = $_GET['password'];
         $domain = $_GET['domain'];
@@ -28,6 +58,10 @@ class ApiController
         if (!$get_api_key) {
             return array('success'=>false, 'message'=>'Wrong api key.');
         }
+
+
+        var_dump($_GET);
+        die();
 
         $product_id = 1;
         $client_id = $get_api_key->client_id;
@@ -124,5 +158,23 @@ class ApiController
 
         }
 
+    }
+
+
+    private function _validate_account_params()
+    {
+        if (!isset($_GET['api_key']) && !isset($_GET['domain']) && !isset($_GET['username']) && !isset($_GET['password'])) {
+            return array('success'=>false, 'message'=>'Wrong parameters.');
+        }
+
+        if (empty($_GET['api_key']) || empty($_GET['domain']) || empty($_GET['username']) || empty($_GET['password'])) {
+            return array('success'=>false, 'message'=>'Empty parameters.');
+        }
+
+        return array('success'=>true);
+    }
+
+    private function _get_product_service_by_domain($domain, $client_id) {
+        return Capsule::table('tblhosting')->where(['domain' => $domain, 'userid'=>$client_id])->first();
     }
 }
