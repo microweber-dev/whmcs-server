@@ -44,7 +44,7 @@ class ApiController
 
             return array('success'=>true, 'redirect_url'=>$redirectUrl);
         }
-        
+
         return array('success'=>false, 'message'=>'Wrong api details.');
     }
 
