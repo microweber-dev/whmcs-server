@@ -6,6 +6,47 @@ use WHMCS\Database\Capsule;
 
 class ApiController
 {
+    public function single_signon()
+    {
+        $validate = $this->_validate_account_params();
+        if ($validate['success'] == false) {
+            return $validate;
+        }
+
+        $domain = $_GET['domain'];
+        $api_key = $_GET['api_key'];
+        $get_api_key = Capsule::table('mod_microweber_cloudconnect_api_keys')
+            ->where('api_key_type', 'default')
+            ->where('api_key', $api_key)->first();
+
+        if (!$get_api_key) {
+            return array('success'=>false, 'message'=>'Wrong api key.');
+        }
+
+        $service = $this->_get_product_service_by_domain($domain, $get_api_key->client_id);
+        if (!$service) {
+            return array('success'=>false, 'message'=>'Service not found');
+        }
+
+        $decryptPasswordData = array(
+            'password2' => $service->password,
+        );
+
+        $decryptPassword = localAPI('DecryptPassword', $decryptPasswordData);
+        if (isset($decryptPassword['result']) && $decryptPassword['result'] == 'success') {
+
+            $redirectUrl = "http://" . $service->domain . "/api/user_login";
+
+            $redirectUrl .= "?username_encoded=" . base64_encode($service->username);
+            $redirectUrl .= "&password_encoded=" . base64_encode($decryptPassword['password']);
+
+            $redirectUrl .= "&redirect=" . "http://" . $service->domain . "/?editmode=y";
+
+            return array('success'=>true, 'redirect_url'=>$redirectUrl);
+        }
+        
+        return array('success'=>false, 'message'=>'Wrong api details.');
+    }
 
     public function suspend_account()
     {
@@ -45,10 +86,6 @@ class ApiController
             return $validate;
         }
 
-        echo 1;
-        die();
-        $username = $_GET['username'];
-        $passowrd = $_GET['password'];
         $domain = $_GET['domain'];
         $api_key = $_GET['api_key'];
         $get_api_key = Capsule::table('mod_microweber_cloudconnect_api_keys')
@@ -58,10 +95,6 @@ class ApiController
         if (!$get_api_key) {
             return array('success'=>false, 'message'=>'Wrong api key.');
         }
-
-
-        var_dump($_GET);
-        die();
 
         $product_id = 1;
         $client_id = $get_api_key->client_id;
@@ -90,14 +123,6 @@ class ApiController
             );
 
             $acceptOrder = localAPI('AcceptOrder', $acceptOrderData);
-
-            // Update Client Product
-            $clientProductData = array(
-                'serviceid' => $addOrder['serviceids'],
-                'serviceusername' => $username,
-                'servicepassword' => $passowrd
-            );
-            $updateClientProduct = localAPI('UpdateClientProduct', $clientProductData);
 
             return array('success'=>true);
         }
@@ -163,11 +188,11 @@ class ApiController
 
     private function _validate_account_params()
     {
-        if (!isset($_GET['api_key']) && !isset($_GET['domain']) && !isset($_GET['username']) && !isset($_GET['password'])) {
+        if (!isset($_GET['api_key']) && !isset($_GET['domain'])) {
             return array('success'=>false, 'message'=>'Wrong parameters.');
         }
 
-        if (empty($_GET['api_key']) || empty($_GET['domain']) || empty($_GET['username']) || empty($_GET['password'])) {
+        if (empty($_GET['api_key']) || empty($_GET['domain'])) {
             return array('success'=>false, 'message'=>'Empty parameters.');
         }
 
