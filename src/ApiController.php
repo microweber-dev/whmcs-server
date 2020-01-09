@@ -20,12 +20,12 @@ class ApiController
             ->where('api_key', $api_key)->first();
 
         if (!$get_api_key) {
-            return array('success'=>false, 'message'=>'Wrong api key.');
+            return array('success' => false, 'error' => 'Wrong api key');
         }
 
         $service = $this->_get_product_service_by_domain($domain, $get_api_key->client_id);
         if (!$service) {
-            return array('success'=>false, 'message'=>'Service not found');
+            return array('success' => false, 'error' => 'Service not found');
         }
 
         $decryptPasswordData = array(
@@ -42,10 +42,10 @@ class ApiController
 
             $redirectUrl .= "&redirect=" . "http://" . $service->domain . "/?editmode=y";
 
-            return array('success'=>true, 'redirect_url'=>$redirectUrl);
+            return array('success' => true, 'redirect_url' => $redirectUrl);
         }
 
-        return array('success'=>false, 'message'=>'Wrong api details.');
+        return array('success' => false, 'error' => 'Wrong api details');
     }
 
     public function suspend_account()
@@ -62,24 +62,24 @@ class ApiController
             ->where('api_key', $api_key)->first();
 
         if (!$get_api_key) {
-            return array('success'=>false, 'message'=>'Wrong api key.');
+            return array('success' => false, 'error' => 'Wrong api key');
         }
 
         $service = $this->_get_product_service_by_domain($domain, $get_api_key->client_id);
         if (!$service) {
-            return array('success'=>false, 'message'=>'Service not found');
+            return array('success' => false, 'error' => 'Service not found');
         }
 
         $suspendData = array(
             'serviceid' => $service->id,
-            'suspendreason' => 'Suspended by admin.',
+            'suspendreason' => 'Suspended by admin',
         );
         $moduleSuspend = localAPI('ModuleSuspend', $suspendData);
 
-        return array('success'=>true, 'message'=>'Module is suspended.');
+        return array('success' => 'Service Suspended Successfully');
     }
 
-    public function create_account()
+    public function unsuspend_account()
     {
         $validate = $this->_validate_account_params();
         if ($validate['success'] == false) {
@@ -93,25 +93,86 @@ class ApiController
             ->where('api_key', $api_key)->first();
 
         if (!$get_api_key) {
-            return array('success'=>false, 'message'=>'Wrong api key.');
+            return array('success' => false, 'error' => 'Wrong api key');
+        }
+
+        $service = $this->_get_product_service_by_domain($domain, $get_api_key->client_id);
+        if (!$service) {
+            return array('success' => false, 'error' => 'Service not found');
+        }
+
+        $unsuspendData = array(
+            'serviceid' => $service->id,
+            'suspendreason' => 'Unsuspend by admin.',
+        );
+        $moduleUnsuspend = localAPI('ModuleUnsuspend', $unsuspendData);
+
+        return array('success' => 'Service Unsuspended Successfully.');
+    }
+
+    public function create_account()
+    {
+        $validate = $this->_validate_account_params();
+        if ($validate['success'] == false) {
+            return $validate;
+        }
+
+        $template = $_GET['template'];
+        $domain = $_GET['domain'];
+        $api_key = $_GET['api_key'];
+        $get_api_key = Capsule::table('mod_microweber_cloudconnect_api_keys')
+            ->where('api_key_type', 'default')
+            ->where('api_key', $api_key)->first();
+
+        if (!$get_api_key) {
+            return array('success' => false, 'error' => 'Wrong api key');
+        }
+
+        $get_service = Capsule::table('tblhosting')
+            ->where('domain', $domain)
+            ->where('userid', $get_api_key->client_id)->first();
+        if ($get_service) {
+            $message = '';
+            $moduleCreateData = array(
+                'serviceid' => $get_service->id,
+            );
+            $moduleCreate = localAPI('ModuleCreate', $moduleCreateData);
+            if (isset($moduleCreate['result']) && $moduleCreate['result'] == 'success') {
+                return array('success' => 'Service is successfuly created');
+            }
+            if (isset($moduleCreate['result']) && $moduleCreate['result'] == 'error') {
+                if (isset($moduleCreate['message'])) {
+                    $message = $moduleCreate['message'];
+                }
+                return array('success' => false, 'error' => $message);
+            }
         }
 
         $product_id = 1;
-        $client_id = $get_api_key->client_id;
 
         $orderData = array(
-            'clientid' => $client_id,
+            'clientid' => $get_api_key->client_id,
             'pid' => array($product_id),
             'domain' => array($domain),
             'billingcycle' => array('monthly'),
-           // 'configoptions' => array(base64_encode(serialize(array("1" => 999))), base64_encode(serialize(array("1" => 999)))),
-            //'domaintype' => array('register', 'register'),
-            'regperiod' => array(1, 2),
-            'noinvoiceemail'=>true,
+            'noinvoiceemail' => true,
             'noemail' => true,
             'paymentmethod' => 'mailin',
-            'dnsmanagement' => array(0 => false, 1 => true),
         );
+
+        $get_template = $this->_get_template_by_name($template);
+        if ($get_template) {
+            $orderData['configoptions'] = array(
+                base64_encode(
+                    serialize(
+                        array(
+                            $get_template['config_option_id'] => $get_template['template_id']
+                        )
+                    )
+                )
+            );
+        }
+
         $addOrder = localAPI('AddOrder', $orderData);
         if (isset($addOrder['orderid'])) {
 
@@ -124,10 +185,41 @@ class ApiController
 
             $acceptOrder = localAPI('AcceptOrder', $acceptOrderData);
 
-            return array('success'=>true);
+            return array('success' => 'Account is created');
         }
 
-        return array('success'=>false);
+        return array('success' => false);
+    }
+
+    public function terminate_account()
+    {
+        $validate = $this->_validate_account_params();
+        if ($validate['success'] == false) {
+            return $validate;
+        }
+
+        $domain = $_GET['domain'];
+        $api_key = $_GET['api_key'];
+        $get_api_key = Capsule::table('mod_microweber_cloudconnect_api_keys')
+            ->where('api_key_type', 'default')
+            ->where('api_key', $api_key)->first();
+
+        if (!$get_api_key) {
+            return array('success' => false, 'error' => 'Wrong api key');
+        }
+
+        $service = $this->_get_product_service_by_domain($domain, $get_api_key->client_id);
+        if (!$service) {
+            return array('success' => false, 'error' => 'Service not found');
+        }
+
+        $suspendData = array(
+            'serviceid' => $service->id,
+            'suspendreason' => 'Terminated by admin',
+        );
+        $moduleSuspend = localAPI('ModuleTerminate', $suspendData);
+
+        return array('success' => 'Service Terminated Successfully');
     }
 
     public function validate_api_key()
@@ -140,11 +232,11 @@ class ApiController
                 ->where('api_key', $api_key)->first();
 
             if ($get_api_key) {
-                return array('is_correct'=>true);
+                return array('success' => 'Api key is correct');
             }
         }
 
-        return array('is_correct'=>false);
+        return array('success' => false, 'error' => 'Api key is not valid');
     }
 
     public function save_usage_report()
@@ -164,7 +256,7 @@ class ApiController
                     ->update(
                         [
                             'server_ip' => $serverIp,
-                            'license_key'=> $licenseKey,
+                            'license_key' => $licenseKey,
                             'total_clients' => $totalClients,
                             'updated_at' => date("Y-m-d H:i:s")
                         ]
@@ -173,7 +265,7 @@ class ApiController
                 // Save
                 Capsule::table('mod_microweber_usage_reports')->insert([
                     'server_ip' => $serverIp,
-                    'license_key'=> $licenseKey,
+                    'license_key' => $licenseKey,
                     'domain' => $whmcsDomain,
                     'total_clients' => $totalClients,
                     'created_at' => date("Y-m-d H:i:s"),
@@ -185,21 +277,38 @@ class ApiController
 
     }
 
+    private function _get_template_by_name($templateName)
+    {
+        $configOption = Capsule::table('tblproductconfiggroups')->where(['name' => 'Template'])->first();
+        if ($configOption) {
+            $productConfigOption = Capsule::table('tblproductconfigoptions')->where(['gid' => $configOption->id, 'optionname' => 'Template'])->first();
+            if ($productConfigOption) {
+                $productConfigOptionSub = Capsule::table('tblproductconfigoptionssub')->where(['configid' => $productConfigOption->gid, 'optionname' => $templateName])->first();
+                if ($productConfigOptionSub) {
+                    return array('template_id' => $productConfigOptionSub->id, 'config_option_id' => $productConfigOption->gid);
+                }
+            }
+
+        }
+
+        return false;
+    }
 
     private function _validate_account_params()
     {
         if (!isset($_GET['api_key']) && !isset($_GET['domain'])) {
-            return array('success'=>false, 'message'=>'Wrong parameters.');
+            return array('success' => false, 'error' => 'Wrong parameters');
         }
 
         if (empty($_GET['api_key']) || empty($_GET['domain'])) {
-            return array('success'=>false, 'message'=>'Empty parameters.');
+            return array('success' => false, 'error' => 'Empty parameters');
         }
 
-        return array('success'=>true);
+        return array('success' => true);
     }
 
-    private function _get_product_service_by_domain($domain, $client_id) {
-        return Capsule::table('tblhosting')->where(['domain' => $domain, 'userid'=>$client_id])->first();
+    private function _get_product_service_by_domain($domain, $client_id)
+    {
+        return Capsule::table('tblhosting')->where(['domain' => $domain, 'userid' => $client_id])->first();
     }
 }
