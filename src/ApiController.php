@@ -128,10 +128,22 @@ class ApiController
             return array('success' => false, 'error' => 'Wrong api key');
         }
 
+        $get_template = $this->_get_template_by_name($template);
+
         $get_service = Capsule::table('tblhosting')
             ->where('domain', $domain)
             ->where('userid', $get_api_key->client_id)->first();
         if ($get_service) {
+
+            $update = Capsule::table('tblhostingconfigoptions')
+                ->where('relid', $get_service->id)
+                ->where('configid', $get_template['config_option_id'])
+                ->update(
+                    [
+                        'optionid' => $get_template['template_id'],
+                    ]
+                );
+
             $message = '';
             $moduleCreateData = array(
                 'serviceid' => $get_service->id,
@@ -160,7 +172,6 @@ class ApiController
             'paymentmethod' => 'mailin',
         );
 
-        $get_template = $this->_get_template_by_name($template);
         if ($get_template) {
             $orderData['configoptions'] = array(
                 base64_encode(
