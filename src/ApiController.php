@@ -154,7 +154,7 @@ class ApiController
             if (isset($moduleCreate['result']) && $moduleCreate['result'] == 'success') {
                 return array('success' => 'Service is successfuly created');
             }
-
+            
             if (isset($moduleCreate['result']) && $moduleCreate['result'] == 'error') {
                 if (isset($moduleCreate['message'])) {
                     $message = $moduleCreate['message'];
