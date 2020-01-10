@@ -134,6 +134,7 @@ function microweber_server_activate()
                 function ($table) {
                     $table->increments('id');
                     $table->integer('client_id');
+                    $table->integer('service_id');
                     $table->text('api_key');
                     $table->string('api_key_type');
                     $table->string('expiration_date')->nullable();
