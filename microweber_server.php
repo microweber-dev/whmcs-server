@@ -76,7 +76,7 @@ function microweber_server_clientarea($vars)
 
 function microweber_server_output($vars)
 {
-    $response = '';
+    $response = array();
     $params = array();
 
     if ($_GET) {
@@ -102,7 +102,7 @@ function microweber_server_output($vars)
         $response = $controller->$method($params);
     }
 
-    echo $response;
+    return $response;
 }
 
 function microweber_server_activate()
@@ -145,6 +145,23 @@ function microweber_server_activate()
     } catch (\Exception $e) {
         echo "Unable to create mod_microweber_cloudconnect_api_keys: {$e->getMessage()}";
     }
+
+    // Cloud Connect License Key To Hosting Products Mapping
+    // Cloud Connect Api Keys
+    try {
+        if (!Capsule::schema()->hasTable('mod_microweber_cloudconnect_license_keys_mapping')) {
+            Capsule::schema()->create(
+                'mod_microweber_cloudconnect_license_keys_mapping',
+                function ($table) {
+                    $table->increments('id');
+                    $table->integer('license_plan_id');
+                    $table->integer('product_plan_id')->nullable();
+                }
+            );
+        }
+    } catch (\Exception $e) {
+        echo "Unable to create mod_microweber_cloudconnect_license_keys_mapping: {$e->getMessage()}";
+    }
 }
 
 function microweber_server_deactivate()
@@ -159,5 +176,11 @@ function microweber_server_deactivate()
         Capsule::schema()->dropIfExists('mod_microweber_cloudconnect_api_keys');
     } catch (\Exception $e) {
         echo "Unable to drop table mod_microweber_cloudconnect_api_keys: {$e->getMessage()}";
+    }
+
+    try {
+        Capsule::schema()->dropIfExists('mod_microweber_cloudconnect_license_keys_mapping');
+    } catch (\Exception $e) {
+        echo "Unable to drop table mod_microweber_cloudconnect_license_keys_mapping: {$e->getMessage()}";
     }
 }

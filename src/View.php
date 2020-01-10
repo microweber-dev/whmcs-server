@@ -2,6 +2,7 @@
 
 namespace MicroweberServer;
 
+
 // Handles working with PHP output templates
 class View
 {
@@ -27,18 +28,24 @@ class View
     public function __get_vars()
     {
         ob_start();
-        extract((array)$this);
-        $file_dir = dirname($this->v) . DIRECTORY_SEPARATOR;
+        extract((array) $this);
+
+        $file_dir = dirname($this->v).DIRECTORY_SEPARATOR;
+
         require $this->v;
+
         $content = ob_get_clean();
         unset($content);
+
         $defined_vars = array();
         $var_names = array_keys(get_defined_vars());
+
         foreach ($var_names as $var_name) {
             if ($var_name != 'defined_vars' and $var_name != 'this') {
-                $defined_vars[$var_name] = $$var_name;
+                $defined_vars[ $var_name ] = $$var_name;
             }
         }
+
         return $defined_vars;
     }
 
@@ -49,7 +56,7 @@ class View
 
     public function __toString()
     {
-        extract((array)$this);
+        extract((array) $this);
         ob_start();
         if (is_array($this->v)) {
             foreach ($this->v as $item) {
@@ -62,10 +69,12 @@ class View
                 $res = include $this->v;
             }
         }
+
         if (isset($res) and is_object($res)) {
             return $res;
         }
         $content = ob_get_clean();
+
         return $content;
     }
 }
