@@ -133,6 +133,7 @@ class ApiController
         $get_service = Capsule::table('tblhosting')
             ->where('domain', $domain)
             ->where('userid', $get_api_key->client_id)->first();
+
         if ($get_service) {
 
             $update = Capsule::table('tblhostingconfigoptions')
@@ -149,15 +150,18 @@ class ApiController
                 'serviceid' => $get_service->id,
             );
             $moduleCreate = localAPI('ModuleCreate', $moduleCreateData);
+
             if (isset($moduleCreate['result']) && $moduleCreate['result'] == 'success') {
                 return array('success' => 'Service is successfuly created');
             }
+
             if (isset($moduleCreate['result']) && $moduleCreate['result'] == 'error') {
                 if (isset($moduleCreate['message'])) {
                     $message = $moduleCreate['message'];
                 }
                 return array('success' => false, 'error' => $message);
             }
+
         }
 
         $product_id = 1;
