@@ -93,6 +93,26 @@ class ApiController
             return $validation;
         }
 
+        $get_license = Capsule::table('tblhosting')
+            ->where('id', $validation['api_key']->service_id)
+            ->first();
+        if (!$get_license) {
+            return array('success' => false, 'error' => 'License key not found');
+        }
+
+        $get_license_key_mapping = Capsule::table('mod_microweber_cloudconnect_license_keys_mapping')
+            ->where('license_plan_id', $get_license->packageid)
+            ->first();
+        if (!$get_license_key_mapping) {
+            return array('success' => false, 'error' => 'License key is not mapped to hosting plan');
+        }
+
+        if (!$get_license_key_mapping->product_plan_id) {
+            return array('success' => false, 'error' => 'License key is not mapped to hosting plan');
+        }
+
+        $product_id = $get_license_key_mapping->product_plan_id;
+
         $domain = $_GET['domain'];
         $template = $_GET['template'];
 
@@ -101,10 +121,17 @@ class ApiController
         $get_service = Capsule::table('tblhosting')
             ->where('domain', $domain)
             ->where('userid', $validation['api_key']->client_id)->first();
-
         if ($get_service) {
 
-            $update = Capsule::table('tblhostingconfigoptions')
+            $updateHosting = Capsule::table('tblhosting')
+                ->where('id', $get_service->id)
+                ->update(
+                    [
+                        'packageid' => $product_id,
+                    ]
+                );
+
+            $updateHostingConfigOptions = Capsule::table('tblhostingconfigoptions')
                 ->where('relid', $get_service->id)
                 ->where('configid', $get_template['config_option_id'])
                 ->update(
@@ -131,8 +158,6 @@ class ApiController
             }
 
         }
-
-        $product_id = 1;
 
         $orderData = array(
             'clientid' => $validation['api_key']->client_id,
