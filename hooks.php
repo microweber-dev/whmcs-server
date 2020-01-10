@@ -10,7 +10,6 @@
 use WHMCS\View\Menu\Item as MenuItem;
 use WHMCS\Database\Capsule;
 
-
 /*
 add_hook('ClientAreaSecondarySidebar', 1, function (MenuItem $secondarySidebar)
 {
@@ -43,7 +42,7 @@ add_hook('ClientAreaProductDetailsOutput', 1, function ($service) {
     $service_id = (int) $service['service']->id;
     $uid = $_SESSION['uid'];
 
-    $api_key = 'Click to generate';
+    $api_key = false;
     //$api_key_expiration_date = 'Never expire';
 
     $get_api_key = Capsule::table('mod_microweber_cloudconnect_api_keys')
@@ -59,6 +58,14 @@ add_hook('ClientAreaProductDetailsOutput', 1, function ($service) {
         }
     }
 
+    $js_confirm = '';
+    $api_key_message = '';
+    if (!$api_key) {
+        $api_key_message = 'Click to generate';
+    } else {
+        $js_confirm = 'onsubmit="return confirm(\'Do you really want to generate a new api key?\');"';
+    }
+
     $panel = '
 		<div class="panel panel-default" id="mwPanelConfigurableOptionsPanel">
 			   <div class="panel-heading">
@@ -70,9 +77,10 @@ add_hook('ClientAreaProductDetailsOutput', 1, function ($service) {
 							   <strong>Api Key</strong>
 							   <br>
 								'.$api_key.'
+								'.$api_key_message.'
 						   </div>
 						   <div class="col-md-7 col-xs-6 text-left">
-                           <form action="index.php?m=microweber_server&action=generate_api_keys" method="post" id="" class="form-horizontal">
+                           <form action="index.php?m=microweber_server&action=generate_api_keys" method="post" '.$js_confirm.' class="form-horizontal">
                                <input type="hidden" value="'.$service_id.'" name="service_id">
                                <button type="submit" class="btn btn-success">
                                     Generate Key

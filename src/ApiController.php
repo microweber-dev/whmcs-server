@@ -8,22 +8,14 @@ class ApiController
 {
     public function single_signon()
     {
-        $validate = $this->_validate_account_params();
-        if ($validate['success'] == false) {
-            return $validate;
+        $validation = $this->_validate_api_key_is_active();
+        if ($validation['success'] == false) {
+            return $validation;
         }
 
         $domain = $_GET['domain'];
-        $api_key = $_GET['api_key'];
-        $get_api_key = Capsule::table('mod_microweber_cloudconnect_api_keys')
-            ->where('api_key_type', 'default')
-            ->where('api_key', $api_key)->first();
 
-        if (!$get_api_key) {
-            return array('success' => false, 'error' => 'Wrong api key');
-        }
-
-        $service = $this->_get_product_service_by_domain($domain, $get_api_key->client_id);
+        $service = $this->_get_product_service_by_domain($domain, $validation['api_key']->client_id);
         if (!$service) {
             return array('success' => false, 'error' => 'Service not found');
         }
@@ -50,22 +42,14 @@ class ApiController
 
     public function suspend_account()
     {
-        $validate = $this->_validate_account_params();
-        if ($validate['success'] == false) {
-            return $validate;
+        $validation = $this->_validate_api_key_is_active();
+        if ($validation['success'] == false) {
+            return $validation;
         }
 
         $domain = $_GET['domain'];
-        $api_key = $_GET['api_key'];
-        $get_api_key = Capsule::table('mod_microweber_cloudconnect_api_keys')
-            ->where('api_key_type', 'default')
-            ->where('api_key', $api_key)->first();
 
-        if (!$get_api_key) {
-            return array('success' => false, 'error' => 'Wrong api key');
-        }
-
-        $service = $this->_get_product_service_by_domain($domain, $get_api_key->client_id);
+        $service = $this->_get_product_service_by_domain($domain, $validation['api_key']->client_id);
         if (!$service) {
             return array('success' => false, 'error' => 'Service not found');
         }
@@ -81,22 +65,14 @@ class ApiController
 
     public function unsuspend_account()
     {
-        $validate = $this->_validate_account_params();
-        if ($validate['success'] == false) {
-            return $validate;
+        $validation = $this->_validate_api_key_is_active();
+        if ($validation['success'] == false) {
+            return $validation;
         }
 
         $domain = $_GET['domain'];
-        $api_key = $_GET['api_key'];
-        $get_api_key = Capsule::table('mod_microweber_cloudconnect_api_keys')
-            ->where('api_key_type', 'default')
-            ->where('api_key', $api_key)->first();
 
-        if (!$get_api_key) {
-            return array('success' => false, 'error' => 'Wrong api key');
-        }
-
-        $service = $this->_get_product_service_by_domain($domain, $get_api_key->client_id);
+        $service = $this->_get_product_service_by_domain($domain, $validation['api_key']->client_id);
         if (!$service) {
             return array('success' => false, 'error' => 'Service not found');
         }
@@ -112,27 +88,19 @@ class ApiController
 
     public function create_account()
     {
-        $validate = $this->_validate_account_params();
-        if ($validate['success'] == false) {
-            return $validate;
+        $validation = $this->_validate_api_key_is_active();
+        if ($validation['success'] == false) {
+            return $validation;
         }
 
-        $template = $_GET['template'];
         $domain = $_GET['domain'];
-        $api_key = $_GET['api_key'];
-        $get_api_key = Capsule::table('mod_microweber_cloudconnect_api_keys')
-            ->where('api_key_type', 'default')
-            ->where('api_key', $api_key)->first();
-
-        if (!$get_api_key) {
-            return array('success' => false, 'error' => 'Wrong api key');
-        }
+        $template = $_GET['template'];
 
         $get_template = $this->_get_template_by_name($template);
 
         $get_service = Capsule::table('tblhosting')
             ->where('domain', $domain)
-            ->where('userid', $get_api_key->client_id)->first();
+            ->where('userid', $validation['api_key']->client_id)->first();
 
         if ($get_service) {
 
@@ -167,7 +135,7 @@ class ApiController
         $product_id = 1;
 
         $orderData = array(
-            'clientid' => $get_api_key->client_id,
+            'clientid' => $validation['api_key']->client_id,
             'pid' => array($product_id),
             'domain' => array($domain),
             'billingcycle' => array('monthly'),
@@ -208,22 +176,14 @@ class ApiController
 
     public function terminate_account()
     {
-        $validate = $this->_validate_account_params();
-        if ($validate['success'] == false) {
-            return $validate;
+        $validation = $this->_validate_api_key_is_active();
+        if ($validation['success'] == false) {
+            return $validation;
         }
 
         $domain = $_GET['domain'];
-        $api_key = $_GET['api_key'];
-        $get_api_key = Capsule::table('mod_microweber_cloudconnect_api_keys')
-            ->where('api_key_type', 'default')
-            ->where('api_key', $api_key)->first();
 
-        if (!$get_api_key) {
-            return array('success' => false, 'error' => 'Wrong api key');
-        }
-
-        $service = $this->_get_product_service_by_domain($domain, $get_api_key->client_id);
+        $service = $this->_get_product_service_by_domain($domain, $validation['api_key']->client_id);
         if (!$service) {
             return array('success' => false, 'error' => 'Service not found');
         }
@@ -309,7 +269,41 @@ class ApiController
         return false;
     }
 
-    private function _validate_account_params()
+    private function _validate_api_key_is_active()
+    {
+        $validation = $this->_validate_required_params();
+        if ($validation['success'] == false) {
+            return $validation;
+        }
+
+        $apiKey = $_GET['api_key'];
+        $getApiKey = Capsule::table('mod_microweber_cloudconnect_api_keys')
+            ->where('api_key_type', 'default')
+            ->where('api_key', $apiKey)->first();
+
+        if (!$getApiKey) {
+            return array('success' => false, 'error' => 'Wrong api key');
+        }
+
+        $checkServiceIsValid = Capsule::table('tblhosting')->where(['id' => $getApiKey->service_id, 'userid' => $getApiKey->client_id])->first();
+        if (!$checkServiceIsValid) {
+            return array('success' => false, 'error' => 'Api key is expired');
+        }
+
+        if ($checkServiceIsValid) {
+            $error = '';
+            $getProduct = Capsule::table('tblproducts')->where(['id' => $checkServiceIsValid->packageid])->first();
+
+            if ($checkServiceIsValid->domainstatus !== 'Active') {
+                $error .= 'The api key for ' . $getProduct->name . ' is in status ' . $checkServiceIsValid->domainstatus . ' and must be on status Active';
+                return array('success' => false, 'error' => $error);
+            }
+        }
+
+        return array('success'=>true, 'api_key'=>$getApiKey);
+    }
+
+    private function _validate_required_params()
     {
         if (!isset($_GET['api_key']) && !isset($_GET['domain'])) {
             return array('success' => false, 'error' => 'Wrong parameters');
