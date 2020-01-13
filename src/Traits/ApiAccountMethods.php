@@ -2,6 +2,8 @@
 
 namespace MicroweberServer\Traits;
 
+use WHMCS\Database\Capsule;
+
 trait ApiAccountMethods
 {
     public function create_account()
@@ -68,7 +70,6 @@ trait ApiAccountMethods
                 'serviceid' => $get_service->id,
             );
             $module_create = localAPI('ModuleCreate', $module_create_data);
-
             if (isset($module_create['result']) && $module_create['result'] == 'success') {
                 return array('success' => 'Service is successfuly created');
             }
