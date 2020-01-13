@@ -171,18 +171,18 @@ function microweber_server_activate()
                     $table->increments('id');
                     $table->integer('client_id');
                     $table->integer('service_id');
-                    $table->string('wl_brand_name');
-                    $table->string('wl_admin_login_url');
-                    $table->string('wl_contact_page');
-                    $table->integer('wl_enable_support_links');
-                    $table->text('wl_powered_by_link');
-                    $table->integer('wl_hide_powered_by_link');
-                    $table->string('wl_logo_admin_panel');
-                    $table->string('wl_logo_live_edit_toolbar');
-                    $table->string('wl_logo_login_screen');
-                    $table->integer('wl_disable_microweber_marketplace');
-                    $table->string('wl_external_login_server_button_text');
-                    $table->integer('wl_external_login_server_enable');
+                    $table->string('wl_brand_name')->nullable();
+                    $table->string('wl_admin_login_url')->nullable();
+                    $table->string('wl_contact_page')->nullable();
+                    $table->integer('wl_enable_support_links')->nullable();
+                    $table->text('wl_powered_by_link')->nullable();
+                    $table->integer('wl_hide_powered_by_link')->nullable();
+                    $table->string('wl_logo_admin_panel')->nullable();
+                    $table->string('wl_logo_live_edit_toolbar')->nullable();
+                    $table->string('wl_logo_login_screen')->nullable();
+                    $table->integer('wl_disable_microweber_marketplace')->nullable();
+                    $table->string('wl_external_login_server_button_text')->nullable();
+                    $table->integer('wl_external_login_server_enable')->nullable();
                 }
             );
         }
