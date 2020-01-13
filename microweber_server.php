@@ -147,7 +147,6 @@ function microweber_server_activate()
     }
 
     // Cloud Connect License Key To Hosting Products Mapping
-    // Cloud Connect Api Keys
     try {
         if (!Capsule::schema()->hasTable('mod_microweber_cloudconnect_license_keys_mapping')) {
             Capsule::schema()->create(
@@ -161,6 +160,34 @@ function microweber_server_activate()
         }
     } catch (\Exception $e) {
         echo "Unable to create mod_microweber_cloudconnect_license_keys_mapping: {$e->getMessage()}";
+    }
+
+    // WhiteLabel Settings
+    try {
+        if (!Capsule::schema()->hasTable('mod_microweber_cloudconnect_whitelabel_settings')) {
+            Capsule::schema()->create(
+                'mod_microweber_cloudconnect_whitelabel_settings',
+                function ($table) {
+                    $table->increments('id');
+                    $table->integer('client_id');
+                    $table->integer('service_id');
+                    $table->string('wl_brand_name');
+                    $table->string('wl_admin_login_url');
+                    $table->string('wl_contact_page');
+                    $table->integer('wl_enable_support_links');
+                    $table->text('wl_powered_by_link');
+                    $table->integer('wl_hide_powered_by_link');
+                    $table->string('wl_logo_admin_panel');
+                    $table->string('wl_logo_live_edit_toolbar');
+                    $table->string('wl_logo_login_screen');
+                    $table->integer('wl_disable_microweber_marketplace');
+                    $table->string('wl_external_login_server_button_text');
+                    $table->integer('wl_external_login_server_enable');
+                }
+            );
+        }
+    } catch (\Exception $e) {
+        echo "Unable to create mod_microweber_cloudconnect_whitelabel_settings: {$e->getMessage()}";
     }
 }
 
@@ -183,4 +210,11 @@ function microweber_server_deactivate()
     } catch (\Exception $e) {
         echo "Unable to drop table mod_microweber_cloudconnect_license_keys_mapping: {$e->getMessage()}";
     }
+
+    try {
+        Capsule::schema()->dropIfExists('mod_microweber_cloudconnect_whitelabel_settings');
+    } catch (\Exception $e) {
+        echo "Unable to drop table mod_microweber_cloudconnect_whitelabel_settings: {$e->getMessage()}";
+    }
+
 }
