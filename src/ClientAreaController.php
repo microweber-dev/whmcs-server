@@ -77,7 +77,7 @@ class ClientAreaController
                 ->update($wl_settings);
         }
 
-        //header('Location: clientarea.php?action=productdetails&id=' . $service_id);
+        header('Location: clientarea.php?action=productdetails&id=' . $service_id);
     }
 
     public function generate_api_keys()
