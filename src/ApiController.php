@@ -6,6 +6,34 @@ use WHMCS\Database\Capsule;
 
 class ApiController
 {
+
+    public function get_whitelabel_settings()
+    {
+        if (!isset($_GET['api_key'])) {
+            return array('success' => false, 'error' => 'Api key parameter is required');
+        }
+
+        $apiKey = $_GET['api_key'];
+        $getApiKey = Capsule::table('mod_microweber_cloudconnect_api_keys')
+            ->where('api_key_type', 'default')
+            ->where('api_key', $apiKey)->first();
+
+        if (!$getApiKey) {
+            return array('success' => false, 'error' => 'Wrong api key');
+        }
+
+       $checkSettings = Capsule::table('mod_microweber_cloudconnect_whitelabel_settings')
+                ->where([
+                    'service_id' => $getApiKey->service_id,
+                    'client_id' => $getApiKey->client_id
+                ])->first();
+        if ($checkSettings) {
+            return array('success' => false, 'settings' => $checkSettings);
+        }
+
+        return array('success' => false, 'error' => 'No whitelabel settings');
+    }
+
     public function single_signon()
     {
         $validation = $this->_validate_api_key_is_active();
