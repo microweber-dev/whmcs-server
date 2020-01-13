@@ -189,6 +189,26 @@ function microweber_server_activate()
     } catch (\Exception $e) {
         echo "Unable to create mod_microweber_cloudconnect_whitelabel_settings: {$e->getMessage()}";
     }
+
+    // Hosting details
+    try {
+        if (!Capsule::schema()->hasTable('mod_microweber_cloudconnect_hosting_details')) {
+            Capsule::schema()->create(
+                'mod_microweber_cloudconnect_hosting_details',
+                function ($table) {
+                    $table->increments('id');
+                    $table->integer('client_id');
+                    $table->integer('hosting_id');
+                    $table->integer('api_key_id');
+                    $table->integer('license_plan_id');
+                    $table->integer('product_plan_id');
+                    $table->timestamps();
+                }
+            );
+        }
+    } catch (\Exception $e) {
+        echo "Unable to create mod_microweber_cloudconnect_hosting_details: {$e->getMessage()}";
+    }
 }
 
 function microweber_server_deactivate()
@@ -215,6 +235,12 @@ function microweber_server_deactivate()
         Capsule::schema()->dropIfExists('mod_microweber_cloudconnect_whitelabel_settings');
     } catch (\Exception $e) {
         echo "Unable to drop table mod_microweber_cloudconnect_whitelabel_settings: {$e->getMessage()}";
+    }
+
+    try {
+        Capsule::schema()->dropIfExists('mod_microweber_cloudconnect_hosting_details');
+    } catch (\Exception $e) {
+        echo "Unable to drop table mod_microweber_cloudconnect_hosting_details: {$e->getMessage()}";
     }
 
 }
