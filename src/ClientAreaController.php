@@ -25,7 +25,7 @@ class ClientAreaController
             header('Location: clientarea.php?action=productdetails&id=' . $service_id);
             return;
         }
-
+        $wl_installation_language = $_POST['wl_installation_language'];
         $wl_brand_name = $_POST['wl_brand_name'];
         $wl_brand_favicon = $_POST['wl_brand_favicon'];
         $wl_admin_login_url = $_POST['wl_admin_login_url'];
@@ -41,6 +41,7 @@ class ClientAreaController
         $wl_external_login_server_enable = $_POST['wl_external_login_server_enable'];
 
         $wl_settings = [
+            'wl_installation_language'=> $wl_installation_language,
             'wl_brand_name'=> $wl_brand_name,
             'wl_brand_favicon'=> $wl_brand_favicon,
             'wl_admin_login_url'=> $wl_admin_login_url,

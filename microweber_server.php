@@ -171,6 +171,7 @@ function microweber_server_activate()
                     $table->increments('id');
                     $table->integer('client_id');
                     $table->integer('service_id');
+                    $table->string('wl_installation_language')->nullable();
                     $table->string('wl_brand_name')->nullable();
                     $table->string('wl_brand_favicon')->nullable();
                     $table->string('wl_admin_login_url')->nullable();

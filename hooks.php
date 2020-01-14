@@ -107,6 +107,7 @@ add_hook('ClientAreaProductDetailsOutput', 1, function ($service) {
 				</div>
 		   </div>';
 
+    $wl_installation_language = '';
     $wl_brand_name = '';
     $wl_brand_favicon = '';
     $wl_admin_login_url = '';
@@ -122,6 +123,7 @@ add_hook('ClientAreaProductDetailsOutput', 1, function ($service) {
     $wl_external_login_server_enable = '';
 
     if ($whitelabel_settings) {
+        $wl_installation_language = $whitelabel_settings->wl_installation_language;
         $wl_brand_name = $whitelabel_settings->wl_brand_name;
         $wl_brand_favicon = $whitelabel_settings->wl_brand_favicon;
         $wl_admin_login_url = $whitelabel_settings->wl_admin_login_url;
@@ -153,6 +155,43 @@ add_hook('ClientAreaProductDetailsOutput', 1, function ($service) {
         }
     }
 
+    $supported_languages = array(
+        'dk'=>'DK',
+        'it'=> 'IT',
+        'ar'=> 'AR',
+        'cz'=> 'CZ',
+        'ru'=> 'RU',
+        'gl'=> 'GL',
+        'pt'=> 'PT',
+        'en'=> 'EN',
+        'de'=> 'DE',
+        'as'=> 'AS',
+        'slo'=> 'SLO',
+        'zh-cn'=> 'ZH-CN',
+        'id'=> 'ID',
+        'pl'=> 'PL',
+        'zh-tw'=> 'ZH-TW',
+        'hr'=> 'HR',
+        'fr'=> 'FR',
+        'nl'=> 'NL',
+        'ca'=> 'CA',
+        'is'=> 'IS',
+        'es'=> 'ES',
+        'gr'=> 'GR',
+        'sl'=> 'SL',
+        'bg'=> 'BG',
+        'vi'=> 'VI'
+    );
+
+    $supported_languages_options = '';
+    foreach ($supported_languages as $abr=>$language) {
+        if ($abr == $wl_installation_language) {
+            $supported_languages_options .= '<option value="' . $abr . '" selected="selected">' . $language . '</option>';
+        } else {
+            $supported_languages_options .= '<option value="' . $abr . '">' . $language . '</option>';
+        }
+    }
+
     $panel .= '
 		<div class="panel panel-info js-whitelabel-panel-settings" style="display: none;">
 			   <div class="panel-heading">
@@ -161,6 +200,14 @@ add_hook('ClientAreaProductDetailsOutput', 1, function ($service) {
 			   <div class="panel-body">
 			   
                 <form class="form-horizontal" method="post" action="index.php?m=microweber_server&action=save_whitelabel">
+                <div class="form-group">
+                    <label for="text1" class="control-label col-xs-4">Installation Language</label> 
+                    <div class="col-xs-8">
+                        <select name="wl_installation_language" class="form-control">
+                        '.$supported_languages_options.'
+                        </select>
+                     </div>
+                  </div>
                   <div class="form-group">
                     <label for="text1" class="control-label col-xs-4">Brand Name</label> 
                     <div class="col-xs-8">
