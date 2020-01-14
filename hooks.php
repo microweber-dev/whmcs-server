@@ -41,7 +41,7 @@ add_hook('ClientAreaProductDetailsOutput', 1, function ($service) {
 
     $service_id = (int)$service['service']->id;
     $uid = $_SESSION['uid'];
-    
+
     if ($service['service']->server !== 0) {
         return;
     }
@@ -108,6 +108,7 @@ add_hook('ClientAreaProductDetailsOutput', 1, function ($service) {
 		   </div>';
 
     $wl_brand_name = '';
+    $wl_brand_favicon = '';
     $wl_admin_login_url = '';
     $wl_contact_page = '';
     $wl_enable_support_links = '';
@@ -122,6 +123,7 @@ add_hook('ClientAreaProductDetailsOutput', 1, function ($service) {
 
     if ($whitelabel_settings) {
         $wl_brand_name = $whitelabel_settings->wl_brand_name;
+        $wl_brand_favicon = $whitelabel_settings->wl_brand_favicon;
         $wl_admin_login_url = $whitelabel_settings->wl_admin_login_url;
         $wl_contact_page = $whitelabel_settings->wl_contact_page;
         $wl_enable_support_links = $whitelabel_settings->wl_enable_support_links;
@@ -163,6 +165,12 @@ add_hook('ClientAreaProductDetailsOutput', 1, function ($service) {
                     <label for="text1" class="control-label col-xs-4">Brand Name</label> 
                     <div class="col-xs-8">
                       <input id="text1" value="'.$wl_brand_name.'" name="wl_brand_name" placeholder="Enter the name of your company." type="text" class="form-control">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="text1" class="control-label col-xs-4">Brand Favicon</label> 
+                    <div class="col-xs-8">
+                      <input id="text1" value="'.$wl_brand_favicon.'" name="wl_brand_favicon" placeholder="Enter the url of your company favicon." type="text" class="form-control">
                     </div>
                   </div>
                   <div class="form-group">

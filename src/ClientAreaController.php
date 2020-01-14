@@ -27,6 +27,7 @@ class ClientAreaController
         }
 
         $wl_brand_name = $_POST['wl_brand_name'];
+        $wl_brand_favicon = $_POST['wl_brand_favicon'];
         $wl_admin_login_url = $_POST['wl_admin_login_url'];
         $wl_contact_page = $_POST['wl_contact_page'];
         $wl_enable_support_links = $_POST['wl_enable_support_links'];
@@ -41,6 +42,7 @@ class ClientAreaController
 
         $wl_settings = [
             'wl_brand_name'=> $wl_brand_name,
+            'wl_brand_favicon'=> $wl_brand_favicon,
             'wl_admin_login_url'=> $wl_admin_login_url,
             'wl_contact_page'=> $wl_contact_page,
             'wl_enable_support_links'=> $wl_enable_support_links,

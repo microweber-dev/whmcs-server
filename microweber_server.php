@@ -172,6 +172,7 @@ function microweber_server_activate()
                     $table->integer('client_id');
                     $table->integer('service_id');
                     $table->string('wl_brand_name')->nullable();
+                    $table->string('wl_brand_favicon')->nullable();
                     $table->string('wl_admin_login_url')->nullable();
                     $table->string('wl_contact_page')->nullable();
                     $table->integer('wl_enable_support_links')->nullable();
