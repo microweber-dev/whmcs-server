@@ -34,7 +34,7 @@ class ApiController
                         'client_id' => $apiKey->client_id
                     ])->first();
                 if ($checkSettings) {
-                    return array('success' => false, 'settings' => $checkSettings);
+                    return array('success' => true, 'settings' => $checkSettings);
                 }
             }
         }
