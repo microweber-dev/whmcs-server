@@ -41,6 +41,10 @@ add_hook('ClientAreaProductDetailsOutput', 1, function ($service) {
 
     $service_id = (int)$service['service']->id;
     $uid = $_SESSION['uid'];
+    
+    if ($service['service']->server !== 0) {
+        return;
+    }
 
     $api_key = false;
     //$api_key_expiration_date = 'Never expire';
