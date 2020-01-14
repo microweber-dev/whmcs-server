@@ -11,26 +11,32 @@ class ApiController
 
     public function get_whitelabel_settings()
     {
-        if (!isset($_GET['api_key'])) {
-            return array('success' => false, 'error' => 'Api key parameter is required');
+        if (!isset($_GET['domain'])) {
+            return array('success' => false, 'error' => 'Domain parameter is required');
         }
 
-        $apiKey = $_GET['api_key'];
-        $getApiKey = Capsule::table('mod_microweber_cloudconnect_api_keys')
-            ->where('api_key_type', 'default')
-            ->where('api_key', $apiKey)->first();
+        $domain = $_GET['domain'];
 
-        if (!$getApiKey) {
-            return array('success' => false, 'error' => 'Wrong api key');
-        }
+        $hosting = Capsule::table('tblhosting')->where(['domain' => $domain])->first();
+        if ($hosting) {
+            $hostingDetails = Capsule::table('mod_microweber_cloudconnect_hosting_details')
+                ->where(['hosting_id' => $hosting->id, 'client_id' => $hosting->userid])
+                ->first();
 
-       $checkSettings = Capsule::table('mod_microweber_cloudconnect_whitelabel_settings')
-                ->where([
-                    'service_id' => $getApiKey->service_id,
-                    'client_id' => $getApiKey->client_id
-                ])->first();
-        if ($checkSettings) {
-            return array('success' => false, 'settings' => $checkSettings);
+            if ($hostingDetails) {
+                $apiKey = Capsule::table('mod_microweber_cloudconnect_api_keys')
+                    ->where(['client_id' => $hosting->userid, 'id' => $hostingDetails->api_key_id])
+                    ->first();
+
+                $checkSettings = Capsule::table('mod_microweber_cloudconnect_whitelabel_settings')
+                    ->where([
+                        'service_id' => $apiKey->service_id,
+                        'client_id' => $apiKey->client_id
+                    ])->first();
+                if ($checkSettings) {
+                    return array('success' => false, 'settings' => $checkSettings);
+                }
+            }
         }
 
         return array('success' => false, 'error' => 'No whitelabel settings');
